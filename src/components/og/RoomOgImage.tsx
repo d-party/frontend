@@ -10,17 +10,31 @@
  * Keep it free of Tailwind classes, external CSS and unsupported CSS features.
  */
 
+import logoUrl from "@/components/logo-data";
+
 export const OG_SIZE = { width: 1200, height: 630 } as const;
 
-/** Brand palette mirrored from globals.css (hex so Satori renders it reliably). */
+/**
+ * Brand palette converted from the globals.css theme tokens (oklch) to hex so
+ * Satori renders them reliably. `primary` is the d-party theme red
+ * (`--primary: oklch(0.637 0.237 25.331)`), background/foreground/muted mirror
+ * the dark theme — intentionally neutral (no magenta tint) with a red accent.
+ */
 const COLORS = {
-  bgFrom: "#121218",
-  bgTo: "#1d1320",
-  primary: "#f43f5e",
-  text: "#fafafa",
-  muted: "#a1a1aa",
-  cardBorder: "rgba(244, 63, 94, 0.35)",
+  bgFrom: "#0d0e13", // --background
+  bgTo: "#16171d", // slightly lifted neutral for subtle depth
+  primary: "#fb2c36", // --primary (theme red)
+  primaryRgb: "251, 44, 54", // primary as rgb for translucent glows/fills
+  text: "#fafafa", // --foreground
+  muted: "#a1a1a1", // --muted-foreground
 } as const;
+
+/**
+ * The brand mark recolored to the theme red. The app icon is a red logo on a
+ * black tile, so we keep that treatment here. The source SVG (logo-data.ts)
+ * bakes its fill as `#cc0033`; swap it for the brighter theme red.
+ */
+const LOGO_RED = logoUrl.replace("%23cc0033", "%23fb2c36");
 
 export interface RoomOgImageProps {
   /**
@@ -57,7 +71,7 @@ export function RoomOgImage({
         justifyContent: "space-between",
         padding: 72,
         backgroundColor: COLORS.bgFrom,
-        backgroundImage: `radial-gradient(1100px 540px at 88% -10%, rgba(244,63,94,0.30), rgba(244,63,94,0) 60%), linear-gradient(135deg, ${COLORS.bgFrom} 0%, ${COLORS.bgTo} 100%)`,
+        backgroundImage: `radial-gradient(1100px 540px at 88% -10%, rgba(${COLORS.primaryRgb},0.28), rgba(${COLORS.primaryRgb},0) 60%), linear-gradient(135deg, ${COLORS.bgFrom} 0%, ${COLORS.bgTo} 100%)`,
         color: COLORS.text,
         fontFamily: "Noto Sans JP",
         position: "relative",
@@ -80,13 +94,13 @@ export function RoomOgImage({
               width: 72,
               height: 72,
               borderRadius: 20,
-              backgroundColor: COLORS.primary,
+              backgroundColor: "#000000",
+              border: `1px solid rgba(${COLORS.primaryRgb}, 0.30)`,
               marginRight: 24,
-              fontSize: 40,
-              fontWeight: 700,
             }}
           >
-            ▶
+            {/* eslint-disable-next-line @next/next/no-img-element -- Satori (next/og) only supports <img>, not next/image */}
+            <img src={LOGO_RED} width={44} height={44} alt="" />
           </div>
           <div
             style={{
@@ -106,8 +120,8 @@ export function RoomOgImage({
             alignItems: "center",
             padding: "14px 28px",
             borderRadius: 999,
-            border: `2px solid ${COLORS.cardBorder}`,
-            backgroundColor: "rgba(244, 63, 94, 0.12)",
+            border: `2px solid rgba(${COLORS.primaryRgb}, 0.35)`,
+            backgroundColor: `rgba(${COLORS.primaryRgb}, 0.12)`,
             color: COLORS.primary,
             fontSize: 30,
             fontWeight: 700,
