@@ -76,6 +76,13 @@ pnpm lint             # eslint .
 オリジンから張るため、バックエンドの `OriginValidator` に `MY_DOMAIN` 許可が必要（backend 側で対応）。
 `useSearchParams` を使うため、ページは `Suspense` 境界で包む（Next のビルド要件）。
 
+**ポップアップ表示（`?timer=true&popup=1`）**: ロビーの選択 UI と、タイマー画面（`TimerView`、
+別窓表示中を除く）の「別窓（ポップアップ）で開く」ボタンから、共通の `openTimerPopup(roomId)`
+（`components/timer/openTimerPopup.ts`）で `window.open` する。タイマーを小さな別窓（380×280）
+として開き、常に手前へ浮かせて再生状況を見られるようにする（ポップアップブロック時は同タブへ
+フォールバック）。`popup=1` のとき `TimerView` は `fixed inset-0` の全面表示になり、レイアウトの
+Header/Footer を覆って小窓に収める。
+
 ## 拡張機能とのスタック共通化
 
 UI コンポーネント（`components/ui/*`）・`lib/utils.ts`・テーマトークン（`globals.css`）・orval 設定は

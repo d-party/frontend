@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Pause, Play, Radio } from "lucide-react";
+import { Pause, PictureInPicture2, Play, Radio } from "lucide-react";
 
+import { openTimerPopup } from "@/components/timer/openTimerPopup";
 import {
   TimerSpectatorClient,
   type TimerSyncOption,
@@ -45,9 +46,12 @@ function formatTime(totalSeconds: number): string {
 export function TimerView({
   roomId,
   initialTitle,
+  popup = false,
 }: {
   roomId: string;
   initialTitle: string;
+  /** 小さな別窓（ポップアップ）で開いた場合は全面を占める簡素なレイアウトにする。 */
+  popup?: boolean;
 }): React.JSX.Element {
   const [status, setStatus] = useState<Status>("connecting");
   const [title, setTitle] = useState(initialTitle);
@@ -98,7 +102,7 @@ export function TimerView({
 
   if (status === "not-found") {
     return (
-      <Centered>
+      <Centered popup={popup}>
         <p className="text-lg font-medium">ルームが見つかりませんでした</p>
         <p className="text-muted-foreground">
           リンクが正しいか、ルームがまだ有効かをご確認ください。
@@ -109,7 +113,7 @@ export function TimerView({
 
   if (status === "ended") {
     return (
-      <Centered>
+      <Centered popup={popup}>
         <p className="text-lg font-medium">配信が終了しました</p>
         <p className="text-muted-foreground">
           ホストがルームを退出または削除しました。
@@ -119,7 +123,7 @@ export function TimerView({
   }
 
   return (
-    <Centered>
+    <Centered popup={popup}>
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Radio
           className={
@@ -161,17 +165,38 @@ export function TimerView({
           ホストの操作を待っています…（最大 5 秒ほどで同期します）
         </p>
       )}
+
+      {/* すでに別窓（ポップアップ）で開いているときは出さない。 */}
+      {!popup && (
+        <button
+          type="button"
+          onClick={() => openTimerPopup(roomId)}
+          className="mt-2 inline-flex items-center justify-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <PictureInPicture2 className="size-4" aria-hidden />
+          別窓（ポップアップ）で開く
+        </button>
+      )}
     </Centered>
   );
 }
 
 function Centered({
   children,
+  popup = false,
 }: {
   children: React.ReactNode;
+  popup?: boolean;
 }): React.JSX.Element {
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-4 text-center">
+    <div
+      className={
+        popup
+          ? // ポップアップ小窓では Header/Footer を覆って全面に表示する。
+            "fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-background px-4 text-center"
+          : "flex min-h-[60vh] flex-col items-center justify-center gap-4 px-4 text-center"
+      }
+    >
       {children}
     </div>
   );

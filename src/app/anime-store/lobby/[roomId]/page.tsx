@@ -4,8 +4,9 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useParams, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Clock, Download } from "lucide-react";
+import { Clock, Download, PictureInPicture2 } from "lucide-react";
 
+import { openTimerPopup } from "@/components/timer/openTimerPopup";
 import { TimerView } from "@/components/timer/TimerView";
 import { lobbyResolve } from "@/infrastructure/api/generated/d-party";
 import { CHROME_WEBSTORE_URL } from "@/infrastructure/env";
@@ -61,6 +62,8 @@ function LobbyContent(): React.JSX.Element {
   const { roomId } = useParams<{ roomId: string }>();
   const searchParams = useSearchParams();
   const isTimer = searchParams.get("timer") === "true";
+  // ポップアップ小窓で開いたタイマー（Header/Footer を覆う全面表示にする）。
+  const isPopup = searchParams.get("popup") === "1";
 
   const [phase, setPhase] = useState<Phase>("checking");
   const [loaderText, setLoaderText] = useState("ルームに接続しています");
@@ -165,7 +168,7 @@ function LobbyContent(): React.JSX.Element {
 
   // タイマー表示: 拡張機能の検出をスキップして再生状況を表示する。
   if (isTimer) {
-    return <TimerView roomId={roomId} initialTitle={title} />;
+    return <TimerView roomId={roomId} initialTitle={title} popup={isPopup} />;
   }
 
   return (
@@ -232,6 +235,14 @@ function LobbyContent(): React.JSX.Element {
               >
                 <Clock className="size-4" aria-hidden /> タイマーを見る
               </a>
+              <button
+                type="button"
+                onClick={() => openTimerPopup(roomId)}
+                className="inline-flex items-center justify-center gap-2 rounded-md border border-border px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
+              >
+                <PictureInPicture2 className="size-4" aria-hidden />
+                ポップアップで開く
+              </button>
               <a
                 href={CHROME_WEBSTORE_URL}
                 className="inline-flex items-center justify-center gap-2 rounded-md border border-border px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
